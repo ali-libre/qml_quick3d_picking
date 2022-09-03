@@ -48,53 +48,56 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.15
-import QtQuick.Window 2.14
-import QtQuick.Controls 2.14
-import QtQuick3D 1.15
-import QtQuick3D.Helpers 1.15
+import QtQuick
+import QtQuick.Window
+import QtQuick.Controls
+import QtQuick3D
+import QtQuick3D.Particles3D
+import QtQuick3D.Helpers
 
 Window {
     visible: true
-    width: 1280
-    height: 720
+    width: 400
+    height: 300
     title: qsTr("Picking Example")
-
-    Row {
+    color: "#444444"
+    Column {
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
-        spacing: 20
-        Label {
-            id: pickName
-            color: "#222840"
-            font.pointSize: 14
-            text: "Last Pick: None"
-        }
-        Label {
-            id: pickPosition
-            color: "#222840"
-            font.pointSize: 14
-            text: "Screen Position: (0, 0)"
-        }
-        Label {
-            id: uvPosition
-            color: "#222840"
-            font.pointSize: 14
-            text: "UV Position: (0.00, 0.00)"
-        }
-        Label {
-            id: distance
-            color: "#222840"
-            font.pointSize: 14
-            text: "Distance: 0.00"
-        }
-        Label {
-            id: scenePosition
-            color: "#222840"
-            font.pointSize: 14
-            text: "World Position: (0.00, 0.00)"
-        }
-        Column{
+        spacing: 50
+//        Row{
+//            Label {
+//                id: pickName
+//                color: "#222840"
+//                font.pointSize: 14
+//                text: "Last Pick: None"
+//            }
+//            Label {
+//                id: pickPosition
+//                color: "#222840"
+//                font.pointSize: 14
+//                text: "Screen Position: (0, 0)"
+//            }
+//            Label {
+//                id: uvPosition
+//                color: "#222840"
+//                font.pointSize: 14
+//                text: "UV Position: (0.00, 0.00)"
+//            }
+//            Label {
+//                id: distance
+//                color: "#222840"
+//                font.pointSize: 14
+//                text: "Distance: 0.00"
+//            }
+//            Label {
+//                id: scenePosition
+//                color: "#222840"
+//                font.pointSize: 14
+//                text: "World Position: (0.00, 0.00)"
+//            }
+//        }
+        Row{
             Label {
                 id: pick_screen
                 color: "white"
@@ -124,11 +127,12 @@ Window {
         renderMode: View3D.Underlay
 
         PointLight {
-            x: -200
-            y: 200
-            z: 300
+            x: 400
+            y: 600
+            z: 400
             quadraticFade: 0
-            brightness: 150
+            ambientColor: Qt.rgba(.3,.3, .3, 1)
+            brightness: 80
         }
         camera: persepectivecamera
         PerspectiveCamera {
@@ -139,11 +143,28 @@ Window {
             id: panner
             controlledObject: persepectivecamera
             mouseEnabled: false
+            speed: 3
 //            keysEnabled: true
         }
-        environment: SceneEnvironment {
-            clearColor: "#848895"
-            backgroundMode: SceneEnvironment.Color
+//        environment: SceneEnvironment {
+//            clearColor: "#000000"
+//            backgroundMode: SceneEnvironment.Color
+//        }
+
+        Component{
+            id: myComponent
+            Model{
+                source: "#Rectangle"
+                scale: Qt.vector3d(.1, .1, 0)
+                materials: DefaultMaterial{
+
+                }
+            }
+        }
+
+        Gravity3D{
+            direction: Qt.vector3d(0,1,0)
+            magnitude: -200
         }
 
         //! [pickable model]
@@ -175,12 +196,40 @@ Window {
                 loops: Animation.Infinite
                 PropertyAnimation {
                     duration: 2500
-                    from: Qt.vector3d(0, 0, 0)
-                    to: Qt.vector3d(360, 360, 360)
+                    from: Qt.vector3d(0, 0, -30)
+                    to: Qt.vector3d(0, 0, 30)
                 }
             }
-        }
+            ParticleSystem3D{
+                id: pSystem
 
+                ModelParticle3D{
+                    id:myParticle
+                    delegate: myComponent
+                    maxAmount: 1000
+                    color:  "#FFEE60"
+                    colorVariation: Qt.vector4d(.1, .6, .8, .5)
+
+                }
+
+                ParticleEmitter3D{
+                    id: myEmitter
+                    particle: myParticle
+                    z: -300
+                    emitRate: 100
+                    lifeSpan: 10000
+                    particleRotationVelocityVariation: Qt.vector3d(100,0, 100)
+                    particleRotationVariation: Qt.vector3d(0,0,80)
+                    particleScale: 5.0
+                    velocity: VectorDirection3D{
+                        direction: Qt.vector3d(0, 500, 0);
+                        directionVariation: Qt.vector3d(80, 80, 80)
+                    }
+                }
+
+            }
+        }
+/*
         Model {
             id: coneModel
             objectName: "Cone"
@@ -241,10 +290,11 @@ Window {
                 PropertyAnimation {
                     duration: 5000
                     from: 0
-                    to: 360
+                    to: 10
                 }
             }
         }
+        */
     }
 
     //! [mouse area]
