@@ -137,7 +137,8 @@ Window {
         camera: persepectivecamera
         PerspectiveCamera {
             id: persepectivecamera
-            z: 500
+            z: 1500
+            y: 500
         }
         WasdController {
             id: panner
@@ -154,6 +155,7 @@ Window {
         Component{
             id: myComponent
             Model{
+//                source: "#Rectangle"
                 source: "#Rectangle"
                 scale: Qt.vector3d(.1, .1, 0)
                 materials: DefaultMaterial{
@@ -162,10 +164,7 @@ Window {
             }
         }
 
-        Gravity3D{
-            direction: Qt.vector3d(0,1,0)
-            magnitude: -200
-        }
+
 
         //! [pickable model]
         Model {
@@ -189,17 +188,7 @@ Window {
                 roughnessMap: Texture { source: "maps/roughness.jpg" }
             }
 
-            //! [picked animation]
-            SequentialAnimation on eulerRotation {
-                running: !cubeModel.isPicked
-                //! [picked animation]
-                loops: Animation.Infinite
-                PropertyAnimation {
-                    duration: 2500
-                    from: Qt.vector3d(0, 0, -30)
-                    to: Qt.vector3d(0, 0, 30)
-                }
-            }
+
             ParticleSystem3D{
                 id: pSystem
 
@@ -207,8 +196,8 @@ Window {
                     id:myParticle
                     delegate: myComponent
                     maxAmount: 1000
-                    color:  "#FFEE60"
-                    colorVariation: Qt.vector4d(.1, .6, .8, .5)
+                    color:  "#0000FF"
+                    colorVariation: Qt.vector4d(0, 0, .5, .5)
 
                 }
 
@@ -217,16 +206,30 @@ Window {
                     particle: myParticle
                     z: -300
                     emitRate: 100
-                    lifeSpan: 10000
+                    lifeSpan: 8000
                     particleRotationVelocityVariation: Qt.vector3d(100,0, 100)
-                    particleRotationVariation: Qt.vector3d(0,0,80)
-                    particleScale: 5.0
+                    particleRotationVariation: Qt.vector3d(80,80,80)
+                    particleScale: 3
                     velocity: VectorDirection3D{
                         direction: Qt.vector3d(0, 500, 0);
                         directionVariation: Qt.vector3d(80, 80, 80)
                     }
+                    //! [picked animation]
+                    SequentialAnimation on eulerRotation {
+                        running: !cubeModel.isPicked
+                        //! [picked animation]
+                        loops: Animation.Infinite
+                        PropertyAnimation {
+                            duration: 2500
+                            from: Qt.vector3d(0, 0, -30)
+                            to: Qt.vector3d(0, 0, 30)
+                        }
+                    }
                 }
-
+                Gravity3D{
+                    direction: Qt.vector3d(0,1,0)
+                    magnitude: -200
+                }
             }
         }
 /*
