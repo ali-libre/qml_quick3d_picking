@@ -53,17 +53,68 @@ import QtQuick.Window
 import QtQuick.Controls
 import QtQuick3D
 import QtQuick3D.Particles3D
+import QtQuick3D.AssetUtils
 import QtQuick3D.Helpers
-
+import CustomModel
 Window {
     visible: true
-    width: 400
-    height: 300
-    title: qsTr("Picking Example")
-    color: "#444444"
+    width: 1200
+    height: 800
+    title: qsTr("Fountain Preview")
+    color: "#636363"
+    property int pump: 200
+    property var selectObject: null
+    NozzleModel{
+        id: nzz
+    }
+
+    Timer{
+        id: modelUpdater
+        property int refresh: 0
+        property int x: -1000
+        property int y: -1000
+        running: false
+        repeat: true
+        interval: 10
+        onTriggered: {
+            x += 300
+            nzz.append({"x" : x, "y" : y, "z" : 300})
+            if(x > 1000){
+                x = -1000
+                y += 300
+            }
+            if(y > 1000)
+                modelUpdater.running = false
+//            nzz.setData()
+//            nzz.layoutAboutToBeChanged()
+//            nzz.append()
+        }
+    }
+    CModel{
+        id:modeler
+    }
+
+    JSONListModel{
+        id: listModel
+//        source:
+//        source: modeler.getPlainJsonData()
+//        data: modeler.getPlainJsonData()
+//        model: modeler.getPlainJsonData()
+        model: [
+            {"x": 0,"y": 0, "z":0},
+            {"x": 100,"y": 0, "z":0},
+            {"x": 200,"y": 0, "z":0},
+            {"x": 300,"y": 0, "z":0}
+        ]
+    }
+
     Column {
+        id: controlPanel
         anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.margins: 10
+        height: 50
         spacing: 50
 //        Row{
 //            Label {
@@ -97,54 +148,141 @@ Window {
 //                text: "World Position: (0.00, 0.00)"
 //            }
 //        }
-        Row{
-            Label {
-                id: pick_screen
-                color: "white"
-                font.pointSize: 14
+        Rectangle{
+//            width: 300
+//            height: 200
+            color: "#00000000"
+            border.color: "red"
+            width: parent.width
+            height: parent.height
+            Component.onCompleted: {
+                console.log(height,width,parent.width,parent.height)
             }
-            Label {
-                id: pick_name
-                color: "white"
-                font.pointSize: 14
-            }
-            Label {
-                id: pick_distance
-                color: "white"
-                font.pointSize: 14
-            }
-            Label {
-                id: pick_word
-                color: "white"
-                font.pointSize: 14
+            anchors.margins: 10
+
+            Row{
+                anchors.margins: 20
+                //            anchors.margins: 20
+                spacing: 20
+                Slider{
+                    id:pumpValue
+                    value: pump
+                    from: 200
+                    to: 800
+                    onValueChanged:
+                        pump = value
+                }
+
+                Label {
+                    id: pick_screen
+                    color: "white"
+                    font.pointSize: 14
+                    text: "------------"
+                }
+                Label {
+                    id: pick_name
+                    color: "white"
+                    font.pointSize: 14
+                    text: "------------"
+                }
+                Label {
+                    id: pick_distance
+                    color: "white"
+                    font.pointSize: 14
+                    text: "------------"
+                }
+                Label {
+                    id: pick_word
+                    color: "white"
+                    font.pointSize: 14
+                    text: "------------"
+                }
+
+                Button{
+                    text: "test"
+                    onClicked: {
+                        modeler.jsonTester()
+                    }
+                }
             }
         }
     }
 
     View3D {
         id: control
-        anchors.fill: parent
+//        anchors.fill: parent
+        anchors{
+            top: controlPanel.bottom
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+        }
         renderMode: View3D.Underlay
+        environment: SceneEnvironment {
+            clearColor: "#636363"
+            backgroundMode: SceneEnvironment.SkyBox
+            lightProbe: Texture {
+//                source: "qrc:/HDR.hdr"
+            }
+            probeOrientation: Qt.vector3d(0, -90, 0)
+        }
 
-        PointLight {
+        //lamp
+        Model {
+            id: lamp
+            objectName: "lamp"
+            source: "#Sphere"
+            pickable: true
+            property bool isPicked: true
+            //! [pickable model]
+
             x: 400
             y: 600
             z: 400
-            quadraticFade: 0
-            ambientColor: Qt.rgba(.3,.3, .3, 1)
-            brightness: 80
+            scale.x: 1
+            scale.y: 1
+            scale.z: 1
+
+            //! [picked color]
+            materials: DefaultMaterial {
+//                alpha: .5
+                opacity: .5
+                diffuseColor: "#FFFF00"
+//                diffuseColor: cubeModel.isPicked ? "#41cd52" : "#09102b"
+//                //! [picked color]
+//                specularAmount: 0.25
+//                specularRoughness: 1
+//                roughnessMap: Texture { source: "maps/roughness.jpg" }
+            }
+            PointLight {
+                quadraticFade: 0
+                ambientColor: Qt.rgba(.3,.3, .3, 1)
+                brightness: lamp.isPicked ? 80 : 0
+            }
         }
         camera: persepectivecamera
         PerspectiveCamera {
             id: persepectivecamera
+            x: 0
+            y: 300
             z: 1500
-            y: 500
+//            rotation.y: -180
+//            rotation.x: -180
+//            rotation:Qt.vector3d(-.018,0.691,0.721)
+            onXChanged: {
+                console.log(x,y,z,rotation.x,rotation.y, rotation.z)
+            }
+
         }
         WasdController {
             id: panner
             controlledObject: persepectivecamera
             mouseEnabled: false
             speed: 3
+//            xInvert: true
+//            yInvert: true
+
+
 //            keysEnabled: true
         }
 //        environment: SceneEnvironment {
@@ -153,13 +291,12 @@ Window {
 //        }
 
         Component{
-            id: myComponent
+            id: waterdroplets
             Model{
 //                source: "#Rectangle"
                 source: "#Rectangle"
                 scale: Qt.vector3d(.1, .1, 0)
                 materials: DefaultMaterial{
-
                 }
             }
         }
@@ -167,175 +304,92 @@ Window {
 
 
         //! [pickable model]
-        Model {
-            id: cubeModel
-            objectName: "Cube"
-            source: "#Cube"
-            pickable: true
-            property bool isPicked: false
-            //! [pickable model]
-
-            scale.x: 1.5
-            scale.y: 2
-            scale.z: 1.5
-
-            //! [picked color]
-            materials: DefaultMaterial {
-                diffuseColor: cubeModel.isPicked ? "#41cd52" : "#09102b"
+        Repeater3D{
+            model: listModel
+            Model {
+                id: cubeModel
+                objectName: "Cube"
+                source: "#Sphere"
+                pickable: true
+                property bool isPicked: false
+                //! [pickable model]
+                x: model.x
+                y: model.y
+                z: model.z
+                scale.x: 1
+                scale.y: 1
+                scale.z: 1
+                Component.onCompleted: console.log("X:", model.x,"Y:", model.y,"Z:", model.z)
                 //! [picked color]
-                specularAmount: 0.25
-                specularRoughness: 0.2
-                roughnessMap: Texture { source: "maps/roughness.jpg" }
-            }
-
-
-            ParticleSystem3D{
-                id: pSystem
-
-                ModelParticle3D{
-                    id:myParticle
-                    delegate: myComponent
-                    maxAmount: 1000
-                    color:  "#0000FF"
-                    colorVariation: Qt.vector4d(0, 0, .5, .5)
-
+                materials: DefaultMaterial {
+                    opacity: .7
+                    diffuseColor: cubeModel.isPicked ? "#41cd52" : "#09102b"
+                    //! [picked color]
+                    specularAmount: 0.25
+                    specularRoughness: 1
+                    roughnessMap: Texture { source: "maps/roughness.jpg" }
                 }
 
-                ParticleEmitter3D{
-                    id: myEmitter
-                    particle: myParticle
-                    z: -300
-                    emitRate: 100
-                    lifeSpan: 8000
-                    particleRotationVelocityVariation: Qt.vector3d(100,0, 100)
-                    particleRotationVariation: Qt.vector3d(80,80,80)
-                    particleScale: 3
-                    velocity: VectorDirection3D{
-                        direction: Qt.vector3d(0, 500, 0);
-                        directionVariation: Qt.vector3d(80, 80, 80)
+
+                ParticleSystem3D{
+                    id: pSystem
+
+                    ModelParticle3D{
+                        id: myParticle
+                        delegate: waterdroplets
+                        maxAmount: 1000
+                        color:  "#0000FF"
+                        colorVariation: Qt.vector4d(0, 0, .5, .5)
+
                     }
-                    //! [picked animation]
-                    SequentialAnimation on eulerRotation {
-                        running: !cubeModel.isPicked
+
+                    ParticleEmitter3D{
+                        id: myEmitter
+                        particle: myParticle
+                        property var t: 10
+                        emitRate: 200
+                        lifeSpan: 8000
+                        particleRotationVelocityVariation: Qt.vector3d(100,100, 100)
+                        particleRotationVariation: Qt.vector3d(t,t,t)
+                        particleScale: 1.2
+                        velocity: VectorDirection3D{
+                            direction: Qt.vector3d(0, pumpValue.value, 0);
+                            directionVariation: Qt.vector3d(20, 20, 20)
+                        }
                         //! [picked animation]
-                        loops: Animation.Infinite
-                        PropertyAnimation {
-                            duration: 2500
-                            from: Qt.vector3d(0, 0, -30)
-                            to: Qt.vector3d(0, 0, 30)
+                        SequentialAnimation on eulerRotation {
+                            running: !cubeModel.isPicked
+                            //! [picked animation]
+                            loops: Animation.Infinite
+                            PropertyAnimation {
+                                duration: 1000
+                                from: Qt.vector3d(360, 0, 360)
+                                to: Qt.vector3d(0, 0, 0)
+                            }
                         }
                     }
-                }
-                Gravity3D{
-                    direction: Qt.vector3d(0,1,0)
-                    magnitude: -200
-                }
-            }
-        }
-/*
-        Model {
-            id: coneModel
-            objectName: "Cone"
-            source: "#Cone"
-            pickable: true
-            property bool isPicked: false
-
-            x: 200
-            z: 100
-
-            scale.x: 2
-            scale.y: 1.5
-            scale.z: 2
-
-            materials: DefaultMaterial {
-                diffuseColor: coneModel.isPicked ? "#53586b" : "#21be2b"
-                specularAmount: 1
-                specularRoughness: 0.1
-                roughnessMap: Texture { source: "maps/roughness.jpg" }
-            }
-
-            SequentialAnimation on eulerRotation {
-                running: !coneModel.isPicked
-                loops: Animation.Infinite
-                PropertyAnimation {
-                    duration: 10000
-                    from: Qt.vector3d(0, 0, 0)
-                    to: Qt.vector3d(-360, 360, 0)
+                    Gravity3D{
+                        direction: Qt.vector3d(0,0,1)
+                        magnitude: -200
+                    }
                 }
             }
         }
 
-        Model {
-            id: sphereModel
-            objectName: "Sphere"
-            source: "#Sphere"
-            pickable: true
-            property bool isPicked: false
-
-            x: -100
-            y: -100
-            z: -100
-
-            scale.x: 5
-            scale.y: 3
-            scale.z: 3
-
-            materials: DefaultMaterial {
-                diffuseColor: sphereModel.isPicked ? "#17a81a" : "#9d9faa"
-                specularAmount: 0.25
-                specularRoughness: 0.2
-                roughnessMap: Texture { source: "maps/roughness.jpg" }
-            }
-
-            SequentialAnimation on eulerRotation.x {
-                running: !sphereModel.isPicked
-                loops: Animation.Infinite
-                PropertyAnimation {
-                    duration: 5000
-                    from: 0
-                    to: 10
-                }
-            }
-        }
-        */
     }
-
-    //! [mouse area]
-//    MouseArea {
-//        anchors.fill: view
-//        //! [mouse area]
-
-//        onClicked: {
-//            // Get screen coordinates of the click
-//            pickPosition.text = "Screen Position: (" + mouse.x + ", " + mouse.y + ")"
-//            //! [pick result]
-//            var result = view.pick(mouse.x, mouse.y);
-//            //! [pick result]
-//            //! [pick specifics]
-//            if (result.objectHit) {
-//                var pickedObject = result.objectHit;
-//                // Toggle the isPicked property for the model
-//                pickedObject.isPicked = !pickedObject.isPicked;
-//                // Get picked model name
-//                pickName.text = "Last Pick: " + pickedObject.objectName;
-//                // Get other pick specifics
-//                uvPosition.text = "UV Position: ("
-//                        + result.uvPosition.x.toFixed(2) + ", "
-//                        + result.uvPosition.y.toFixed(2) + ")";
-//                distance.text = "Distance: " + result.distance.toFixed(2);
-//                scenePosition.text = "World Position: ("
-//                        + result.scenePosition.x.toFixed(2) + ", "
-//                        + result.scenePosition.y.toFixed(2) + ")";
-//                //! [pick specifics]
-//            } else {
-//                pickName.text = "Last Pick: None";
-//            }
-//        }
-//    }
 
     MouseArea {
             id: mouse_area
-            anchors.fill: parent
+//            anchors.fill: parent
+            anchors{
+                top: controlPanel.bottom
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+            }
+
+//            anchors.margins: 20
+//            anchors.top: control.bottom
             hoverEnabled: false
             property var pickNode: null
             // Mouse and objects xy The migration
@@ -354,6 +408,7 @@ Window {
                 if (result.objectHit) {
                     panner.mouseEnabled = false
                     pickNode = result.objectHit
+                    pickNode.isPicked = !pickNode.isPicked
                     pick_name.text = pickNode.objectName
                     pick_distance.text = result.distance.toFixed(2)
                     pick_word.text = "("

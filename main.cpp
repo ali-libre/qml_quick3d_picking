@@ -51,16 +51,21 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QtQuick3D/qquick3d.h>
+#include "Model.h"
+QTimer timer;
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+//    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication app(argc, argv);
 
+    Model *model = new Model();
     QSurfaceFormat::setDefaultFormat(QQuick3D::idealSurfaceFormat());
-
+    model->getJsonData();
     QQmlApplicationEngine engine;
+    //    engine.rootContext ()->
+    qmlRegisterType<Model>("CustomModel", 1, 0, "CModel");
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())
         return -1;

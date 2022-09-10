@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>maps/roughness.jpg</file>
+        <file>HDR.hdr</file>
     </qresource>
 </RCC>

@@ -1,5 +1,8 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
+        <file>NozzleModel.qml</file>
+        <file>jsonpath.js</file>
+        <file>JSONListModel.qml</file>
     </qresource>
 </RCC>
