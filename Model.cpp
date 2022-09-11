@@ -3,16 +3,19 @@
 Model::Model(QObject *parent) : QObject{parent} {
     connect(TestJsonTimer, &QTimer::timeout, this, &Model::jsonTester);
 //    TestJsonTimer->start(500);
-    QJsonObject test;
+    QJsonObject property;
+    QJsonObject query;
+
     QJsonArray jArr;
     for (int Loop = 0; Loop < 10; Loop++) {
-        test["x"] = 200 * Loop;
-        test["y"] = 0;
-        test["z"] = 0;
-        jArr.append(test);
+        property["x"] = 200 * Loop;
+        property["y"] = 0;
+        property["z"] = 0;
+        jArr.append(property);
     }
     //    test["position"] =
-    jsonData.setArray (jArr);
+    query["nozzle"] = jArr;
+    jsonData.setObject (query);
 }
 
 const QJsonDocument &Model::getJsonData() const {
@@ -20,8 +23,8 @@ const QJsonDocument &Model::getJsonData() const {
     return jsonData;
 }
 
-QByteArray Model::getPlainJsonData() {
-    qDebug() << jsonData.toJson ();
+QString Model::getPlainJsonData() {
+//    qDebug() << jsonData.toJson ();
     return jsonData.toJson ();
 }
 
@@ -36,5 +39,7 @@ void Model::resetJsonData() {
     setJsonData({}); // TODO: Adapt to use your actual default value
 }
 
-void Model::jsonTester() { qDebug() << "test";
+QByteArray Model::jsonTester() {
+//    qDebug() << "test";
+    return jsonData.toJson ();
 }

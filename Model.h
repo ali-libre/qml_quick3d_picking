@@ -15,12 +15,11 @@ public:
   const QJsonDocument &getJsonData() const;
   void setJsonData(const QJsonDocument &newJsonData);
   void resetJsonData();
-  QByteArray getPlainJsonData() ;
 
 signals:
-
-
   void jsonDataChanged();
+
+
 
 private:
   QTimer *TestJsonTimer = new QTimer(this);
@@ -30,7 +29,8 @@ private:
   Q_PROPERTY(QJsonDocument jsonData READ getJsonData WRITE setJsonData RESET
                  resetJsonData NOTIFY jsonDataChanged)
 public slots:
-  void jsonTester();
+  QByteArray jsonTester();
+  QString getPlainJsonData();
 };
 
 #endif // MODEL_H
