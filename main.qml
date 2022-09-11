@@ -126,8 +126,8 @@ Window {
             onPositionChanged: {
                 console.log(x,y,z,rotation.x,rotation.y, rotation.z)
             }
-
         }
+
         WasdController {
             id: panner
             controlledObject: persepectivecamera
