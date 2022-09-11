@@ -19,7 +19,7 @@ Model::Model(QObject *parent) : QObject{parent} {
 }
 
 const QJsonDocument &Model::getJsonData() const {
-    qDebug() << jsonData.toJson ();
+//    qDebug() << jsonData.toJson ();
     return jsonData;
 }
 
