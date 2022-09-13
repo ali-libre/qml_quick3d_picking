@@ -62,10 +62,9 @@ int main(int argc, char *argv[])
 
     Model *model = new Model();
     QSurfaceFormat::setDefaultFormat(QQuick3D::idealSurfaceFormat());
-//    model->getJsonData();
     QQmlApplicationEngine engine;
-    //    engine.rootContext ()->
     qmlRegisterType<Model>("CustomModel", 1, 0, "CModel");
+//    engine.rootContext()->setContexForObject("cmodel", model)
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())
         return -1;
