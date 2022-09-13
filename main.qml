@@ -1,53 +1,3 @@
-/****************************************************************************
-**
-** Copyright (C) 2019 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the examples of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:BSD$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** BSD License Usage
-** Alternatively, you may use this file under the terms of the BSD license
-** as follows:
-**
-** "Redistribution and use in source and binary forms, with or without
-** modification, are permitted provided that the following conditions are
-** met:
-**   * Redistributions of source code must retain the above copyright
-**     notice, this list of conditions and the following disclaimer.
-**   * Redistributions in binary form must reproduce the above copyright
-**     notice, this list of conditions and the following disclaimer in
-**     the documentation and/or other materials provided with the
-**     distribution.
-**   * Neither the name of The Qt Company Ltd nor the names of its
-**     contributors may be used to endorse or promote products derived
-**     from this software without specific prior written permission.
-**
-**
-** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-** "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
-
 import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
@@ -56,6 +6,7 @@ import QtQuick3D.Particles3D
 import QtQuick3D.AssetUtils
 import QtQuick3D.Helpers
 import CustomModel
+
 Window {
     visible: true
     width: 1200
@@ -69,33 +20,65 @@ Window {
     CModel{
         id:modeler
     }
+    Timer{
+        running: true
+        repeat: true
+        interval: 20
+        onTriggered:{
+            tempModel.json = modeler.jsonTester()
+            var i;
+//            console.log(0, tempModel.model.get(0).rX)
+            listModel.model.set(0, {
+                                    "rX": tempModel.model.get(0).rX,
+                                    "rY": tempModel.model.get(0).rY,
+                                    "rZ": tempModel.model.get(0).rZ
+                                })
+            for(i = 0; i < tempModel.model.count; i++){
+//                listModel.model.set(i, {
+//                                        "rX": tempModel.model.get(i).rX,
+//                                        "rY": tempModel.model.get(i).rY,
+//                                        "rZ": tempModel.model.get(i).rZ
+//                                    })
+            }
+
+        }
+    }
+
+    JSONListModel{
+        id: tempModel
+        query: "$.nozzle[*]"
+        json: modeler.jsonTester()
+
+        Component.onCompleted: {
+            console.log(listModel.count, listModel.json)
+            var i = 0;
+            for(i = 0; i < 20; i++)
+                console.log(i, listModel.model.get(i).x)
+        }
+
+    }
 
     JSONListModel{
         id: listModel
-        source: modeler.getPlainJsonData()
         query: "$.nozzle[*]"
-//        source:
-        json: modeler.getPlainJsonData()
-//        data: modeler.getPlainJsonData()
-//        model: modeler.getPlainJsonData()
-        Component.onCompleted: console.log("count is: " + listModel.count + " ,data is: " + listModel.json)
+        json: modeler.jsonTester()
+
+        Component.onCompleted: {
+            console.log(listModel.count, listModel.json)
+            var i = 0;
+            for(i = 0; i < 20; i++)
+                console.log(i, listModel.model.get(i).x)
+        }
+
     }
 
-    ControlPanel{
-        id: controlPanel
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: 10
-        height: 50
-        spacing: 50
-    }
+
 
     View3D {
-        id: control
-//        anchors.fill: parent
+        id: scene
         anchors{
-            top: controlPanel.bottom
+//            top: controlPanel.bottom
+            top: parent.top
             left: parent.left
             right: parent.right
             bottom: parent.bottom
@@ -121,10 +104,10 @@ Window {
         PerspectiveCamera {
             id: persepectivecamera
             x: 0
-            y: 300
-            z: 1500
+            y: -500
+            z: 100
+            eulerRotation: Qt.vector3d(90, 0, 0)
             onPositionChanged: {
-                console.log(x,y,z,rotation.x,rotation.y, rotation.z)
             }
         }
 
@@ -138,24 +121,29 @@ Window {
         //! [pickable model]
         Repeater3D{
             model: listModel.model
+
             NozzelModel{
-                pumpValue: controlPanel.slid
+                pumpValue: model.pump
+                pX: model.x
+                pY: model.y
+                pZ: model.z
+                isPicked: false
             }
+
         }
     }
 
+
+
     MouseArea {
         id: mouse_area
-    //            anchors.fill: parent
-        anchors{
-            top: controlPanel.bottom
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
-        }
-
-    //            anchors.margins: 20
-    //            anchors.top: control.bottom
+//        anchors{
+//            top: controlPanel.bottom
+//            left: parent.left
+//            right: parent.right
+//            bottom: parent.bottom
+//        }
+        anchors.fill: scene
         hoverEnabled: false
         property var pickNode: null
         // Mouse and objects xy The migration
@@ -169,12 +157,12 @@ Window {
             //pick Take the nearest intersection with the ray path at this point Model Information about , return PickResult object
             // Because the module has been iterating , The new version can be downloaded from PickResult Object to get more information
             //Qt6 It is also provided pickAll Get all that intersect the ray Model Information
-            var result = control.pick(mouse.x, mouse.y)
+            var result = scene.pick(mouse.x, mouse.y)
             // Currently only updated when clicked pick Information about objects
             if (result.objectHit) {
                 panner.mouseEnabled = false
                 pickNode = result.objectHit
-                pickNode.isPicked = !pickNode.isPicked
+//                pickNode.isPicked = !pickNode.isPicked
                 controlPanel.pick_name = pickNode.objectName
                 controlPanel.pick_distance = result.distance.toFixed(2)
                 controlPanel.pick_word= "("
@@ -183,8 +171,8 @@ Window {
                         + result.scenePosition.z.toFixed(2) + ")"
                 //console.log('in',pick_screen.text)
                 //console.log(result.scenePosition)
-                var map_from = control.mapFrom3DScene(pickNode.scenePosition)
-                //var map_to = control.mapTo3DScene(Qt.vector3d(mouse.x,mouse.y,map_from.z))
+                var map_from = scene.mapFrom3DScene(pickNode.scenePosition)
+                //var map_to = scene.mapTo3DScene(Qt.vector3d(mouse.x,mouse.y,map_from.z))
                 //console.log(map_from)
                 //console.log(map_to)
                 xOffset = map_from.x - mouse.x
@@ -203,10 +191,20 @@ Window {
                 return
             }
             var pos_temp = Qt.vector3d(mouse.x + xOffset, mouse.y + yOffset, zOffset);
-            var map_to = control.mapTo3DScene(pos_temp)
+            var map_to = scene.mapTo3DScene(pos_temp)
             pickNode.x = map_to.x
             pickNode.y = map_to.y
             pickNode.z = map_to.z
         }
+    }
+
+    ControlPanel{
+        id: controlPanel
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.margins: 10
+        height: 50
+        spacing: 50
     }
 }
