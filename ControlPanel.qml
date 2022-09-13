@@ -1,10 +1,12 @@
 import QtQuick 2.0
 
+import CustomModel
 import QtQuick.Controls
 Column {
     property int slid: 200
     property string touchPoint: "none"
     property string pick_name: "none"
+    property var pickNode: null
     property string pick_distance: "none"
     property string pick_word: "none"
 
@@ -41,6 +43,13 @@ Column {
 //                text: "World Position: (0.00, 0.00)"
 //            }
 //        }
+    CModel{
+        id:testModel
+    }
+    JSONListModel{
+        id:jsonTester
+    }
+
     Rectangle{
 //            width: 300
 //            height: 200
