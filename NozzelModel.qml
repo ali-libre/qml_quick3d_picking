@@ -5,6 +5,7 @@ import QtQuick3D
 import QtQuick3D.Particles3D
 import QtQuick3D.AssetUtils
 import QtQuick3D.Helpers
+
 Node {
     property bool isPicked: false
     property int pumpValue: 200
@@ -12,7 +13,6 @@ Node {
     property int pY: 0
     property int pZ: 0
     Model {
-        id: cubeModel
         objectName: "Cube"
         source: "#Sphere"
         pickable: true
@@ -23,15 +23,15 @@ Node {
         scale.x: 1
         scale.y: 1
         scale.z: 1
-        Component.onCompleted: console.log("X:", model.x,"Y:", model.y,"Z:", model.z)
+        Component.onCompleted: console.log("x:" + x, " y:" + y + " z:" + z)
         //! [picked color]
         materials: DefaultMaterial {
             opacity: .7
-            diffuseColor: cubeModel.isPicked ? "#41cd52" : "#09102b"
+            diffuseColor: isPicked ? "#41cd52" : "#09102b"
             //! [picked color]
             specularAmount: 0.25
             specularRoughness: 1
-            roughnessMap: Texture { source: "maps/roughness.jpg" }
+//            roughnessMap: Texture { source: "maps/roughness.jpg" }
         }
 
 
@@ -40,7 +40,15 @@ Node {
 
             ModelParticle3D{
                 id: myParticle
-                delegate: waterdroplets
+//                delegate: waterdroplets
+                delegate:
+                    Model{
+                //                source: "#Rectangle"
+                        source: "#Rectangle"
+                        scale: Qt.vector3d(.1, .1, 0)
+                        materials: DefaultMaterial{
+                        }
+                    }
                 maxAmount: 1000
                 color:  "#0000FF"
                 colorVariation: Qt.vector4d(0, 0, .5, .5)
@@ -50,43 +58,51 @@ Node {
             ParticleEmitter3D{
                 id: myEmitter
                 particle: myParticle
-                property var t: 10
-                emitRate: 200
+                property int t: 10
+                emitRate: 400
                 lifeSpan: 8000
                 particleRotationVelocityVariation: Qt.vector3d(100,100, 100)
                 particleRotationVariation: Qt.vector3d(t,t,t)
                 particleScale: 1.2
+//                eulerRotation: Qt.vector3d(model.rX, model.rY, model.rZ)
                 velocity: VectorDirection3D{
-                    direction: Qt.vector3d(0, pumpValue, 0);
+                    direction: Qt.vector3d(model.rX *3, rY * 5, 500);
                     directionVariation: Qt.vector3d(20, 20, 20)
                 }
+//                particleRotation: Qt.vector3d(0, 90, 360)
                 //! [picked animation]
-                SequentialAnimation on eulerRotation {
-                    running: !cubeModel.isPicked
-                    //! [picked animation]
-                    loops: Animation.Infinite
-                    PropertyAnimation {
-                        duration: 1000
-                        from: Qt.vector3d(360, 0, 360)
-                        to: Qt.vector3d(0, 0, 0)
-                    }
-                }
+//                SequentialAnimation on eulerRotation {
+//                    running: !isPicked
+//                    //! [picked animation]
+//                    loops: Animation.Infinite
+//                    PropertyAnimation {
+//                        duration: 1000
+//                        from: Qt.vector3d(360, 0, 360)
+//                        to: Qt.vector3d(0, 0, 0)
+//                    }
+//                }
             }
             Gravity3D{
                 direction: Qt.vector3d(0,0,1)
                 magnitude: -200
             }
         }
-    }
-
-    Component{
-        id: waterdroplets
-        Model{
-    //                source: "#Rectangle"
-            source: "#Rectangle"
-            scale: Qt.vector3d(.1, .1, 0)
-            materials: DefaultMaterial{
-            }
+        onPositionChanged: {
+            model.x = x
+            model.y = y
+            model.z = z
+//            console.log("x is chaged", x, model.x)
         }
     }
+
+//    Component{
+//        id: waterdroplets
+//        Model{
+//    //                source: "#Rectangle"
+//            source: "#Rectangle"
+//            scale: Qt.vector3d(.1, .1, 0)
+//            materials: DefaultMaterial{
+//            }
+//        }
+//    }
 }
