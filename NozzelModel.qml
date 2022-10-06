@@ -12,6 +12,8 @@ Node {
     property int pX: 0
     property int pY: 0
     property int pZ: 0
+    property int particleCount: 400
+    property int particleLife: 8000
     Model {
         objectName: "Cube"
         source: "#Sphere"
@@ -23,7 +25,7 @@ Node {
         scale.x: 1
         scale.y: 1
         scale.z: 1
-        Component.onCompleted: console.log("x:" + x, " y:" + y + " z:" + z)
+//        Component.onCompleted: console.lsswog("x:" + x, " y:" + y + " z:" + z)
         //! [picked color]
         materials: DefaultMaterial {
             opacity: .7
@@ -50,7 +52,8 @@ Node {
                         }
                     }
                 maxAmount: 1000
-                color:  "#0000FF"
+//                color:  "#0000FF"
+                color:  model.color
                 colorVariation: Qt.vector4d(0, 0, .5, .5)
 
             }
@@ -59,8 +62,8 @@ Node {
                 id: myEmitter
                 particle: myParticle
                 property int t: 10
-                emitRate: 400
-                lifeSpan: 8000
+                emitRate: particleCount
+                lifeSpan: particleLife
                 particleRotationVelocityVariation: Qt.vector3d(100,100, 100)
                 particleRotationVariation: Qt.vector3d(t,t,t)
                 particleScale: 1.2
