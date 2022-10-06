@@ -65,7 +65,7 @@ SettingsView{
                             width: treeDelegate.width - treeDelegate.padding - x
                             clip: true
                             text: model.x
-                            Component.onCompleted: console.log("comp")
+//                            Component.onCompleted: console.log("comp")
                         }
                     }
                 }
