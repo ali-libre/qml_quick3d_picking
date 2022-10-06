@@ -161,10 +161,13 @@ void Model::update_model() {
 //            obj["rY"] = 0;
 //            obj["rZ"] = 0;
 //        }
-    qDebug() << nozzelList;
+//    qDebug() << nozzelList;
     QJsonObject testSubobj;
+    QJsonObject testSubobj2;
     testSubobj["nozzle"] = nozzelList;
+    testSubobj2["nozzle"] = nozzelList;
     jObj3DMap["test"] = testSubobj;
+    jObj3DMap["test2"] = testSubobj2;
     jObj3DMap["nozzle"] = nozzelList;
 }
 
