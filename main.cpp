@@ -49,22 +49,19 @@
 ****************************************************************************/
 
 #include <QGuiApplication>
+#include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QtQuick3D/qquick3d.h>
 #include "Model.h"
-QTimer timer;
+//QTimer timer;
 
 int main(int argc, char *argv[])
 {
-//    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
-    QGuiApplication app(argc, argv);
-
+    QApplication app(argc, argv);
     Model *model = new Model();
     QSurfaceFormat::setDefaultFormat(QQuick3D::idealSurfaceFormat());
     QQmlApplicationEngine engine;
     qmlRegisterType<Model>("CustomModel", 1, 0, "CModel");
-//    engine.rootContext()->setContexForObject("cmodel", model)
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())
         return -1;
