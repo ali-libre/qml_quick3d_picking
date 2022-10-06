@@ -59,7 +59,7 @@ private:
 public slots:
   QString jsonTester();
   QString jsontreeTester();
-  void addObject(void);
+//  void addObject(void);
   void change_Rotation();
   bool readHFM(QString path);
 //  QString getPlainJsonData();

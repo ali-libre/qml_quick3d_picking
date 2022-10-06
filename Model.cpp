@@ -3,42 +3,8 @@
 Model::Model(QObject *parent) : QObject{parent} {
     connect(TestJsonTimer, &QTimer::timeout, this, &Model::change_Rotation);
     TestJsonTimer->start(40);
-    QJsonObject property;
-    QJsonObject query;
-    QJsonObject query2;
-//    QJsonObject LED;
-
-// TODO: CLeanUp Code
-    QJsonArray jArr;
-    for (int Loop = 0; Loop < 10; Loop++) {
-        property["x"] = 200 * Loop;
-        if(Loop %2)
-            property["y"] = 0;
-        else
-            property["y"] = 400;
-        property["z"] = 0;
-        property["pump"] = 200;
-        property["rX"] = 0;
-        property["rY"] = 0;
-        property["rZ"] = 0;
-        property["color"] = "#FF0000";
-
-//        LED["LED"] = property;
-//        jArr.append(LED);
-        jArr.append(property);
-    }
-    //    test["position"] =
-    query["nozzle"] = jArr;
-    query2["nozzle"] = jArr;
-    jsonData.setObject(query);
-    jsonData.setObject(query2);
     readHFM("/home/minoosa/Documents/Robot Test Fountain.hfm");
     update_model();
-    //    for (int Loop = 0; Loop < 10; Loop++) {
-    //        addObject();
-    //    }
-//    qDebug() << jsonData.toJson();
-
 }
 
 const QJsonDocument &Model::getJsonData() const {
@@ -222,22 +188,6 @@ QString Model::jsontreeTester() {
     //    return jsonData.toJson ();
     QJsonDocument resultmodel(jObjFountain);
     return resultmodel.toJson ();
-}
-
-void Model::addObject() {
-    static int y = 0;
-    qDebug() << jsonTester();
-    QJsonObject query(jsonData.object());
-    QJsonObject Property;
-    QJsonArray jArr(query["nozzle"].toArray());
-    Property["x"] = 0;
-    Property["y"] = y;
-    y += 200;
-    qDebug() << " Y is:" << y;
-    Property["z"] = 0;
-    jArr.append(Property);
-    query["nozzle"] = jArr;
-    jsonData.setObject(query);
 }
 
 void Model::change_Rotation() {
