@@ -16,6 +16,8 @@ Window {
     height: 800
     title: qsTr("H-STudio Fountain Preview")
     color: "#636363"
+    property string jQuery: "$..nozzle[*]"
+//    property string jQuery: "[?(<nozzle[*]>)]"
     property int pump: 200
     property var selectObject: null
     //prevent timer action after destroy ! no needed
@@ -43,7 +45,12 @@ Window {
 //            console.log("firstInit...!")
             listModel.json = modeler.jsonTester()
             firstInit = false
-            console.log(tempModel.json)
+//            console.log(tempModel.json)
+            console.log(listModel.model.count)
+
+            for(i = 0; i< listModel.model.count; i++){
+                listModel.model.get(i).LID
+            }
         }else{
             for(i = 0; i< listModel.model.count; i++){
                 listModel.model.set(i, {
@@ -60,12 +67,12 @@ Window {
 
     JSONListModel{
         id: tempModel
-        query: "nozzle[*]"
+        query: jQuery
     }
 
     JSONListModel{
         id: listModel
-        query: "nozzle[*]"
+        query: jQuery
 //        json: modeler.jsonTester()
 //        Component.onCompleted: {
 //            console.log(listModel.count, listModel.json)
@@ -175,6 +182,9 @@ Window {
     }
 
     StatusBar{
+        // TODO: change Behavioral of Statusbar
+        // hide status Message after x sex
+        // Object Just Send String To show
         id: status
         anchors.bottom: parent.bottom
         anchors.left: parent.left
