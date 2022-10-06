@@ -4,8 +4,16 @@
         <file>NozzleListModel.qml</file>
         <file>jsonpath.js</file>
         <file>JSONListModel.qml</file>
-        <file>ControlPanel.qml</file>
+        <file>StatusBar.qml</file>
         <file>NozzelModel.qml</file>
         <file>Lamp.qml</file>
+        <file>Picker.qml</file>
+        <file>SRC/Custom/CustomCheckBox.qml</file>
+        <file>SRC/Custom/CustomLabel.qml</file>
+        <file>SRC/Custom/CustomSelectionBox.qml</file>
+        <file>SRC/Custom/CustomSlider.qml</file>
+        <file>SRC/Setting/SettingsMenu.qml</file>
+        <file>SRC/Setting/SettingsView.qml</file>
+        <file>CameraController.qml</file>
     </qresource>
 </RCC>
