@@ -1,6 +1,9 @@
 <RCC>
     <qresource prefix="/">
         <file>maps/roughness.jpg</file>
-        <file>HDR.hdr</file>
+        <file>Resource/Icon/arrow_icon.png</file>
+        <file>Resource/Icon/icon_interval.png</file>
+        <file>Resource/Icon/icon_logging.png</file>
+        <file>Resource/Icon/icon_settings.png</file>
     </qresource>
 </RCC>
