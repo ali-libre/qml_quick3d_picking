@@ -6,117 +6,143 @@ import QtQuick3D.Particles3D
 import QtQuick3D.AssetUtils
 import QtQuick3D.Helpers
 import CustomModel
-
+import Qt3D.Core 2.0
+import Qt3D.Extras 2.0
+import "./SRC/Setting"
 Window {
+    id: rootWindow
     visible: true
     width: 1200
     height: 800
-    title: qsTr("Fountain Preview")
+    title: qsTr("H-STudio Fountain Preview")
     color: "#636363"
     property int pump: 200
     property var selectObject: null
-
+    //prevent timer action after destroy ! no needed
+//    Component.onDestruction:{
+//        updater.running = false
+//        console.log( "start Destroy")
+//    }
     //c++ Model
     CModel{
         id:modeler
     }
     Timer{
+        id:updater
+        property bool firstInit: true
         running: true
         repeat: true
-        interval: 20
+        interval: 40
         onTriggered:{
-            tempModel.json = modeler.jsonTester()
-            var i;
-//            console.log(0, tempModel.model.get(0).rX)
-            listModel.model.set(0, {
-                                    "rX": tempModel.model.get(0).rX,
-                                    "rY": tempModel.model.get(0).rY,
-                                    "rZ": tempModel.model.get(0).rZ
-                                })
-            for(i = 0; i < tempModel.model.count; i++){
-//                listModel.model.set(i, {
-//                                        "rX": tempModel.model.get(i).rX,
-//                                        "rY": tempModel.model.get(i).rY,
-//                                        "rZ": tempModel.model.get(i).rZ
-//                                    })
+        tempModel.json = modeler.jsonTester()
+        var i;
+//            if(updater.running === true)
+//                console.log("timer")
+//        console.log(tempModel.model.count)
+        if(firstInit){
+//            console.log("firstInit...!")
+            listModel.json = modeler.jsonTester()
+            firstInit = false
+            console.log(tempModel.json)
+        }else{
+            for(i = 0; i< listModel.model.count; i++){
+                listModel.model.set(i, {
+                                        "rX": tempModel.model.get(i).rX,
+                                        "rY": tempModel.model.get(i).rY,
+                                        "rZ": tempModel.model.get(i).rZ
+                                    })
             }
+        }
+
 
         }
     }
 
     JSONListModel{
         id: tempModel
-        query: "$.nozzle[*]"
-        json: modeler.jsonTester()
-
-        Component.onCompleted: {
-            console.log(listModel.count, listModel.json)
-            var i = 0;
-            for(i = 0; i < 20; i++)
-                console.log(i, listModel.model.get(i).x)
-        }
-
+        query: "nozzle[*]"
     }
 
     JSONListModel{
         id: listModel
-        query: "$.nozzle[*]"
-        json: modeler.jsonTester()
-
-        Component.onCompleted: {
-            console.log(listModel.count, listModel.json)
-            var i = 0;
-            for(i = 0; i < 20; i++)
-                console.log(i, listModel.model.get(i).x)
-        }
+        query: "nozzle[*]"
+//        json: modeler.jsonTester()
+//        Component.onCompleted: {
+//            console.log(listModel.count, listModel.json)
+//            var i = 0;
+//            for(i = 0; i < 20; i++)
+//                console.log(i, listModel.model.get(i).x)
+//        }
 
     }
 
-
-
     View3D {
         id: scene
-        anchors{
-//            top: controlPanel.bottom
-            top: parent.top
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
-        }
+        anchors.fill: parent
         renderMode: View3D.Underlay
         environment: SceneEnvironment {
             clearColor: "#636363"
             backgroundMode: SceneEnvironment.SkyBox
             lightProbe: Texture {
 //                source: "qrc:/HDR.hdr"
+//                Component.onCompleted: console.log("i'm load HDR")
             }
-            probeOrientation: Qt.vector3d(0, -90, 0)
+            probeOrientation: Qt.vector3d(0, 0, 0)
         }
 
         Lamp{
             id: lamp
             x: 400
-            y: 600
+            y: 1500
             z: 400
-        }
+            Model{
+                materials: DefaultMaterial{
+                    diffuseColor: "blue"
+                }
 
+                source: "#Cylinder"
+                scale.x: .3
+                scale.y: 2
+                scale.z: .3
+            }
+        }
+/*
+        camera: cameraNode
+        Node {
+            id: originNode
+            PerspectiveCamera {
+                id: cameraNode
+                z: 100
+            }
+        }
+        OrbitCameraController {
+            anchors.fill: parent
+            origin: originNode
+            camera: cameraNode
+        }
+*/
         camera: persepectivecamera
         PerspectiveCamera {
             id: persepectivecamera
-            x: 0
-            y: -500
-            z: 100
-            eulerRotation: Qt.vector3d(90, 0, 0)
+            x: 800
+            y: -3500
+            z: 2000
+            eulerRotation: Qt.vector3d(60, 0, 0)
             onPositionChanged: {
             }
         }
-
         WasdController {
             id: panner
             controlledObject: persepectivecamera
             mouseEnabled: false
             speed: 3
+//            rotation.x: false
+//            rotation.y: false
         }
+//        CameraController{
+//            id: panner
+//            camera: persepectivecamera
+//        }
 
         //! [pickable model]
         Repeater3D{
@@ -128,6 +154,8 @@ Window {
                 pY: model.y
                 pZ: model.z
                 isPicked: false
+                particleCount: setting.particleCount
+                particleLife: setting.particleLife // TODO: add model
             }
 
         }
@@ -135,76 +163,47 @@ Window {
 
 
 
-    MouseArea {
-        id: mouse_area
-//        anchors{
-//            top: controlPanel.bottom
-//            left: parent.left
-//            right: parent.right
-//            bottom: parent.bottom
-//        }
-        anchors.fill: scene
-        hoverEnabled: false
-        property var pickNode: null
-        // Mouse and objects xy The migration
-        property real xOffset: 0
-        property real yOffset: 0
-        property real zOffset: 0
-
-        onPressed: {
-            // Get point at View Screen coordinates on
-            controlPanel.touchPoint = "(" + mouse.x + ", " + mouse.y + ")"
-            //pick Take the nearest intersection with the ray path at this point Model Information about , return PickResult object
-            // Because the module has been iterating , The new version can be downloaded from PickResult Object to get more information
-            //Qt6 It is also provided pickAll Get all that intersect the ray Model Information
-            var result = scene.pick(mouse.x, mouse.y)
-            // Currently only updated when clicked pick Information about objects
-            if (result.objectHit) {
-                panner.mouseEnabled = false
-                pickNode = result.objectHit
-//                pickNode.isPicked = !pickNode.isPicked
-                controlPanel.pick_name = pickNode.objectName
-                controlPanel.pick_distance = result.distance.toFixed(2)
-                controlPanel.pick_word= "("
-                        + result.scenePosition.x.toFixed(2) + ", "
-                        + result.scenePosition.y.toFixed(2) + ", "
-                        + result.scenePosition.z.toFixed(2) + ")"
-                //console.log('in',pick_screen.text)
-                //console.log(result.scenePosition)
-                var map_from = scene.mapFrom3DScene(pickNode.scenePosition)
-                //var map_to = scene.mapTo3DScene(Qt.vector3d(mouse.x,mouse.y,map_from.z))
-                //console.log(map_from)
-                //console.log(map_to)
-                xOffset = map_from.x - mouse.x
-                yOffset = map_from.y - mouse.y
-                zOffset = map_from.z
-            } else {
-                panner.mouseEnabled = true
-                controlPanel.pickNode = null
-                controlPanel.pick_name.text = "None"
-                controlPanel.pick_distance.text = " "
-                controlPanel.pick_word.text = " "
-            }
-        }
-        onPositionChanged: {
-            if(!mouse_area.containsMouse || !pickNode){
-                return
-            }
-            var pos_temp = Qt.vector3d(mouse.x + xOffset, mouse.y + yOffset, zOffset);
-            var map_to = scene.mapTo3DScene(pos_temp)
-            pickNode.x = map_to.x
-            pickNode.y = map_to.y
-            pickNode.z = map_to.z
-        }
+    Picker{
+        id: picker
+        viewScene: scene
     }
 
-    ControlPanel{
-        id: controlPanel
-        anchors.top: parent.top
+    SettingsMenu{
+        id: setting
+        // TODO: sums up with setting object
+
+    }
+
+    StatusBar{
+        id: status
+        anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: 10
-        height: 50
+        height: 20
         spacing: 50
+
+        pick_name: picker.pickName
+        pick_distance: picker.pickDistance
+        pick_word: picker.pickWord
+        touch_point: picker.touchPoint
     }
+
+
+    QtObject {
+        id: settings
+        // Antialiasing mode & quality used in all examples.
+        property var antialiasingMode: SceneEnvironment.NoAA
+        property var antialiasingQuality: SceneEnvironment.High
+        // Toggle default visibility of these views
+        property bool showSettingsView: true
+        property bool showLoggingView: false
+        // Fonts in pointSizes
+        // These are used mostly on examples in 3D side
+        property real fontSizeLarge: 16
+        // These are used mostly on settings
+        property real fontSizeSmall: 10
+    }
+
+    readonly property real iconSize: 16 + Math.max(width, height) * 0.05
 }
